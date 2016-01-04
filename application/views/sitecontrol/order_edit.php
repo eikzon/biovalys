@@ -207,7 +207,7 @@ echo $temp['head'] . $temp['nav_bar'] . $temp['menu'];
                                     'type' => 'button',
                                     'class' => 'btn btn-danger',
                                     'content' => ' CN',
-                                    'onclick' => 'window.open(\'' . base_url('sitecontrol/order/print_lo/' . $this->uri->segment(4) . '/' . $this->uri->segment(5) . '') . '\')'
+                                    'onclick' => ''
                                 ));
                             }
                             ?>
