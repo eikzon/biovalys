@@ -255,4 +255,9 @@ class order extends CI_Controller {
         $this->model_admin_order->reject_for_mail();
         exit();
     }
+    
+    public function cn(){
+        $this->model_admin_order->cn_for_so();
+        exit();
+    }
 }

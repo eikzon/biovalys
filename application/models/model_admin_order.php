@@ -56,6 +56,7 @@ class model_admin_order extends CI_Model {
                         order_list_code as d_code,order_list_id as d_id, order_list_order_id as d_oid,
                         order_list_date as d_date,order_list_discount as d_discount,order_list_free as d_free,
                         order_list_approve as d_approve,order_list_status as d_status, CONCAT(\'so\')as d_type,
+                        order_list_option_type as d_option,
                         CONCAT(\''.$rs['customer_name'].'\') as d_cusname,
                         CONCAT(\''.$rs['member_name'].'\') as d_memname,
                         CONCAT(\''.$rs['customer_represent_name'].'\') as d_repname
@@ -70,6 +71,7 @@ class model_admin_order extends CI_Model {
                         foc_code as d_code,foc_id as d_id, foc_order_id as d_oid,
                         foc_date as d_date,CONCAT(\'0\') as d_discount,CONCAT(\'0\') as d_free,
                         foc_approve as d_approve,foc_status as d_status, CONCAT(\'foc\')as d_type,
+                        CONCAT(0) as d_option,
                         CONCAT(\''.$rs['customer_name'].'\') as d_cusname,
                         CONCAT(\''.$rs['member_name'].'\') as d_memname,
                         CONCAT(\''.$rs['customer_represent_name'].'\') as d_repname
@@ -83,6 +85,7 @@ class model_admin_order extends CI_Model {
                         ob_code as d_code,ob_id as d_id, ob_order_id as d_oid,
                         ob_date as d_date,CONCAT(\'0\') as d_discount,ob_qty_borrow as d_free,
                         ob_approve as d_approve,ob_status as d_status, CONCAT(\'lo\')as d_type,
+                        ob_option_type as d_option,
                         CONCAT(\''.$rs['customer_name'].'\') as d_cusname,
                         CONCAT(\''.$rs['member_name'].'\') as d_memname,
                         CONCAT(\''.$rs['customer_represent_name'].'\') as d_repname
@@ -893,5 +896,11 @@ class model_admin_order extends CI_Model {
     
     private function member_detail($id){
         return $this->db->where('member_id', $id)->get('bio_member')->first_row('array');
+    }
+    
+    public function cn_for_so() {
+        $id = $this->uri->segment(4);
+        $this->db->update('bio_order_list', array('order_list_option_type' => 1), array('order_list_order_id' => $id));
+        
     }
 }

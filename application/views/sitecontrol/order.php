@@ -106,9 +106,10 @@ echo $temp['head'] . $temp['nav_bar'] . $temp['menu'];
                             $total_data = ($rs["d_type"] == "foc")?'F.O.C':
                                 (($rs["d_type"] == "lo")?number_format($model->order_total_price_lo($rs['d_oid']), 2):
                                     number_format($model->order_total_price_so($rs['d_oid']), 2));
-                            $status_data = $model->order_show_status($rs['d_approve']);
+                            $status_data = (@$rs['d_option'] == 0)?$model->order_show_status($rs['d_approve']):'<i class="fa fa-ban fa-lg"></i> &nbsp; Cancel';
+                            
                             ?>
-                            <tr id="row_<?PHP echo $rs['d_oid']; ?>">
+                            <tr id="row_<?PHP echo $rs['d_oid']; ?>" class="<?php echo (@$rs['d_option'] == 1)?'danger':'';?>">
                                 <td class="text-center row-click" data-url="<?PHP echo base_url('sitecontrol/order/edit/'.$rs['d_type'].'/' . $rs['d_oid']); ?>"><?PHP echo $num++; ?></td>
                                 <td class="text-center row-click" data-url="<?PHP echo base_url('sitecontrol/order/edit/'.$rs['d_type'].'/' . $rs['d_oid']); ?>"><?PHP echo $rs['d_code']; ?></td>
                                 <td class="row-click" data-url="<?PHP echo base_url('sitecontrol/order/edit/'.$rs['d_type'].'/' . $rs['d_oid']); ?>"><?PHP echo $rs['d_cusname']; ?></td>

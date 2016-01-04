@@ -207,7 +207,7 @@ echo $temp['head'] . $temp['nav_bar'] . $temp['menu'];
                                     'type' => 'button',
                                     'class' => 'btn btn-danger',
                                     'content' => ' CN',
-                                    'onclick' => ''
+                                    'onclick' => "window.location='".base_url('sitecontrol/order/cn/'.$this->uri->segment(5))."'"
                                 ));
                             }
                             ?>
