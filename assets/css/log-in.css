@@ -1,0 +1,52 @@
+/*
+ * Page: Login & Register
+ * ----------------------
+ */
+.login-logo,
+.register-logo {
+  font-size: 35px;
+  text-align: center;
+  margin-bottom: 25px;
+  font-weight: 300;
+}
+
+.login-logo a,
+.register-logo a {
+  color: #444;
+}
+
+.login-page,
+.register-page {
+  background: #3C8DBC;
+}
+
+.login-box,
+.register-box {
+  width: 360px;
+  margin: 7% auto;
+}
+
+.login-box-body {
+  background: #fff;
+  padding: 20px;
+  border-top: 0;
+  color: #666;
+}
+
+.checkbox {
+  padding-left: 25px;
+  color: #666;
+  cursor: pointer;
+}
+
+.checkbox .icons {
+  color: #d2d6de;
+}
+
+.checkbox.checked {
+  color: #3c8dbc;
+}
+
+.checkbox.checked .second-icon {
+  color: #3c8dbc;
+}

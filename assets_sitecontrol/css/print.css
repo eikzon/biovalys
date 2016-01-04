@@ -1,0 +1,63 @@
+td,th{
+    line-height: 1!important;
+    vertical-align: middle;
+    padding: 5px!important;
+}
+
+.print-header{
+    font-size: 14px;
+}
+
+.print-border{
+    border: 1px solid #000!important;
+}
+
+.print-title{
+    font-size: 8px;
+}
+
+.print-title-data{
+    border-bottom: 1px solid #000!important;
+}
+
+.print-border-left{
+    border-left: 1px solid #000!important;
+}
+.print-border-right{
+    border-right: 1px solid #000!important;
+}
+
+.print-title-data{
+    border-bottom: 1px solid #000!important;
+}
+
+.print-title-data-none{
+    border-bottom: 1px solid #fff!important;
+}
+
+.print-signature7{
+    line-height: 7!important;
+}
+.print-signature6{
+    line-height: 6!important;
+}
+.print-signature5{
+    line-height: 5!important;
+}
+
+.print-signature2{
+    line-height: 2!important;
+}
+
+.print-logo{
+    margin-bottom:10px;
+    width: 100px;
+    height: 30px;
+}
+
+.icon-print{
+    cursor: pointer;
+}
+.table{
+    margin-bottom: 0px;
+}

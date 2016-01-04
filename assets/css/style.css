@@ -1,0 +1,206 @@
+*,
+*:after,
+*::before {
+    box-sizing: border-box;
+}
+
+.content-wrapper {
+    margin-top: 70px;
+    padding-left: 230px;
+      -webkit-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+}
+
+.navbar-default {
+    border: none;
+    background: #fff;
+}
+
+.content {
+    font-size: 1.2em;
+}
+
+.mainlogo {
+    color: #fff;
+}
+
+.sidebar-toggle {
+    font-size: 1.8em;
+}
+
+.main-sidebar {
+    margin-top: 30px;
+}
+
+.list-menu {
+    line-height: 4em;
+    padding: 0.5em 1em;
+    border-bottom: solid 1px #f1f1f1;
+    font-weight: bold;
+}
+
+.list-menu a {
+    -webkit-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+}
+
+.list-menu a:hover div,
+.list-menu a.active div {
+    color: #fff;
+    background: #337ab7;
+}
+
+
+/* Outline button for use within the docs */
+
+.btn-outline {
+    color: #007aff;
+    background-color: transparent;
+    border-color: #007aff;
+    -webkit-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+}
+
+.btn-outline:hover,
+.btn-outline:focus,
+.btn-outline:active {
+    color: #fff;
+    background-color: #007aff;
+    border-color: #007aff;
+}
+
+
+/* Inverted outline button (white on dark) */
+
+.btn-outline-inverse {
+    color: #fff;
+    background-color: transparent;
+    border-color: #cdbfe3;
+}
+
+.btn-outline-inverse:hover,
+.btn-outline-inverse:focus,
+.btn-outline-inverse:active {
+    color: #007aff;
+    text-shadow: none;
+    background-color: #fff;
+    border-color: #fff;
+}
+
+
+/* Bootstrap "B" icon */
+
+.bs-docs-booticon {
+    display: block;
+    font-weight: 500;
+    color: #fff;
+    background-color: #007aff;
+    border-radius: 15%;
+    cursor: default;
+    text-align: center;
+}
+
+.bs-docs-booticon-sm {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    line-height: 28px;
+}
+
+.bs-docs-booticon-lg {
+    width: 144px;
+    height: 144px;
+    font-size: 108px;
+    line-height: 140px;
+}
+
+.bs-docs-booticon-inverse {
+    color: #007aff;
+    background-color: #fff;
+}
+
+.bs-docs-booticon-outline {
+    background-color: transparent;
+    border: 1px solid #cdbfe3;
+}
+
+span.detail {
+    font-size: 18px;
+    line-height: 2.4;
+    display: inline-block;
+    text-align: right;
+}
+
+.list-group-item .form-control {
+    display: inline-block;
+    width: 50%;
+}
+
+.list-group-item a {
+    color: #666;
+}
+
+.checkbox {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.product-img {
+    width: 300px;
+}
+
+.sidebar-collapse .content-wrapper {
+    padding-left: 0;
+      -webkit-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+    
+}
+.list-custom {height: 400px;}
+.cart-order {
+    position: fixed;
+    right: 0;
+    top: 4.8em;
+    background: rgba(60, 141, 188, 0.5);
+    padding: 0.8em;
+    color: #fff; 
+}
+.cart-order a {
+    color: #fff;
+    
+}
+.control-sidebar {
+     top: 52px; 
+     background: rgba(60, 141, 188, 0.9);
+     padding: 1em;
+}
+.control-sidebar h3 {margin-top: 0;}
+.control-sidebar-subheading {line-height: 2; font-size: 1.2em;}
+
+.customer-select {margin-bottom: 1em;}
+.row-click{
+    cursor: pointer;
+}
+@media screen and (max-width: 767px) {
+    .content-wrapper {
+        margin-top: 80px;
+        padding-left: 0;
+    }
+    .main-sidebar {
+        display: block;
+        height: auto;
+        padding-top: 80px;
+    }
+    .list-group-item .fa {
+        margin-right: 15px;
+    }
+    .no-padding {
+        padding: 0;
+    }
+    .list-group-item a {
+        color: #666;
+    }
+    .small-icon {
+        font-size: 0.8em;
+        margin-left: 8px;
+    }
+}
