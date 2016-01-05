@@ -105,6 +105,16 @@ class order extends CI_Controller {
         $this->load->view('sitecontrol/order_add', $data);
     }
 
+    public function add_for_cn() {
+        $this->load->model('model_admin_product');
+        $data['customer'] = $this->model_admin_order->customer_list();
+        $data['member'] = $this->model_admin_order->member_sale_list();
+        $data['product'] = $this->model_admin_product->product_list();
+        $data['temp'] = $this->model_admin_template->gen();
+        $data['order'] = $this->model_admin_order;
+        $this->load->view('sitecontrol/order_add_cn', $data);
+    }
+
     public function edit() {
         $id = $this->uri->segment(5);
         $data['temp'] = $this->model_admin_template->gen($this->uri->segment(6));
@@ -137,6 +147,19 @@ class order extends CI_Controller {
         $data = $this->input->post();
         $arr = array('title' => 'Error', 'detail' => 'Update data Error!!', 'url' => base_url('sitecontrol/order'));
         $rs = $this->model_admin_order->insert($data);
+        if ($rs) {
+            $arr = array('title' => 'Update', 'detail' => 'Update data Order Success!!', 'url' => base_url('sitecontrol/order'));
+            echo $this->model_utility->alert($arr);
+        } else {
+            echo $this->model_utility->alert($arr);
+        }
+        exit();
+    }
+    
+    public function insert_for_cn() {
+        $data = $this->input->post();
+        $arr = array('title' => 'Error', 'detail' => 'Update data Error!!', 'url' => base_url('sitecontrol/order'));
+        $rs = $this->model_admin_order->insert_for_cn($data);
         if ($rs) {
             $arr = array('title' => 'Update', 'detail' => 'Update data Order Success!!', 'url' => base_url('sitecontrol/order'));
             echo $this->model_utility->alert($arr);
@@ -258,6 +281,12 @@ class order extends CI_Controller {
     
     public function cn(){
         $this->model_admin_order->cn_for_so();
+        exit();
+    }
+    
+    public function cn_list(){
+        $data = $this->input->post();
+        echo $this->model_admin_order->cn_list($data);
         exit();
     }
 }

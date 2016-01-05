@@ -24,7 +24,8 @@ echo $temp['head'] . $temp['nav_bar'] . $temp['menu'];
             </button>
             -->
             <!--                    <p class="btn-table-tool"><b>total :</b> <?PHP echo $total; ?> order</p>-->
-            <a class="btn btn-table-tool btn-info" data-toggle="tooltip" data-placement="top" title="Borrow" href="<?PHP echo base_url('sitecontrol/order/add'); ?>"> <i class="fa fa-plus"> </i> Add Order</a>
+            <a class="btn btn-table-tool btn-info" data-toggle="tooltip" data-placement="top" title="Add order" href="<?PHP echo base_url('sitecontrol/order/add'); ?>"> <i class="fa fa-plus"> </i> Add Order</a>
+            <a class="btn btn-table-tool btn-default" data-toggle="tooltip" data-placement="top" title="Add order for CN" href="<?PHP echo base_url('sitecontrol/order/add_for_cn'); ?>"> <i class="fa fa-plus"> </i> Add Order for CN</a>
             <br/>
             <p class="btn-table-tool"><b>total price :</b> <?PHP echo number_format($total_price['total'], 2); ?> ฿</p>
             <p class="btn-table-tool"><b>total price approve :</b> <?PHP echo number_format($total_price['approve'], 2); ?> ฿</p>
@@ -106,7 +107,7 @@ echo $temp['head'] . $temp['nav_bar'] . $temp['menu'];
                             $total_data = ($rs["d_type"] == "foc")?'F.O.C':
                                 (($rs["d_type"] == "lo")?number_format($model->order_total_price_lo($rs['d_oid']), 2):
                                     number_format($model->order_total_price_so($rs['d_oid']), 2));
-                            $status_data = (@$rs['d_option'] == 0)?$model->order_show_status($rs['d_approve']):'<i class="fa fa-ban fa-lg"></i> &nbsp; Cancel';
+                            $status_data = (@$rs['d_option'] == 0)?$model->order_show_status($rs['d_approve']):' <i class="fa fa-ban fa-lg"></i> &nbsp; Cancel';
                             
                             ?>
                             <tr id="row_<?PHP echo $rs['d_oid']; ?>" class="<?php echo (@$rs['d_option'] == 1)?'danger':'';?>">
@@ -119,8 +120,10 @@ echo $temp['head'] . $temp['nav_bar'] . $temp['menu'];
                                 <td class="text-center row-click" data-url="<?PHP echo base_url('sitecontrol/order/edit/'.$rs['d_type'].'/' . $rs['d_oid']); ?>"><?PHP echo $total_data; ?></td>
                                 <td class="row-click" data-url="<?PHP echo base_url('sitecontrol/order/edit/'.$rs['d_type'].'/' . $rs['d_oid']); ?>"><?PHP echo $status_data; ?></td>
                                 <td class="text-center">
+                                    <?php if(@$rs['d_option'] == 0){?>
                                     <a href="<?PHP echo base_url('sitecontrol/order/edit/'.$rs['d_type'].'/' . $rs['d_oid']); ?>" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fa fa-pencil-square fa-lg"></i></a>
                                     <a href="#" onclick="del_admin(<?PHP echo $rs['d_oid']; ?>, '<?PHP echo base_url('sitecontrol/order/delete/'); ?>', '<i class=\'fa fa-exclamation-triangle text-danger\'></i> Delete ', 'Are you Delete This Order ?')"><i class="fa fa-trash-o fa-lg" data-toggle="tooltip" data-placement="top" title="Delete"></i></a>
+                                    <?php }?>
                                 </td>
                             </tr>
                             <?PHP

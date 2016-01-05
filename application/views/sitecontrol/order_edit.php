@@ -173,56 +173,59 @@ echo $temp['head'] . $temp['nav_bar'] . $temp['menu'];
                             <P class="col-xs-6 price-text-total text-total"><?PHP echo number_format(($total - (($total * $customer['order_rebate_normal']) / 100) - $extra_s - $extra_td), 2); ?> Baht</P>
                         </div>
                     <?php } ?>
-                    <?PHP
-                    if (isset($level) && !empty($level) && $level == 1) {
-                        ?>
-                        <div class="form-group col-sm-12">
-                            <label>Comment</label>
-                            <textarea class="form-control" rows="4" name="order_remark"><?PHP echo $customer['c_remark'] ?></textarea>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label>Status: </label>
-                            <select name="order_approve" class="form-control selectpicker" <?PHP echo ($customer['customer_approve'] == 1) ? '' : 'disabled'; ?>>
-                                <?PHP
-                                print_r($customer['order_id']);
-                                if (isset($status) && !empty($status)) {
-                                    $stat = '';
-                                    foreach ($status as $k => $v) {
-                                        $select = ($k == $customer['c_approve'] && $customer['c_approve'] <> '') ? 'selected' : '';
-                                        $stat .='<option value="' . $k . '" ' . $select . '>' . $v . '</option>';
+                        
+                    <?php if($customer['c_option'] == 0){?>
+                        <?PHP
+                        if (isset($level) && !empty($level) && $level == 1) {
+                            ?>
+                            <div class="form-group col-sm-12">
+                                <label>Comment</label>
+                                <textarea class="form-control" rows="4" name="order_remark"><?PHP echo $customer['c_remark'] ?></textarea>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label>Status: </label>
+                                <select name="order_approve" class="form-control selectpicker" <?PHP echo ($customer['customer_approve'] == 1) ? '' : 'disabled'; ?>>
+                                    <?PHP
+                                    print_r($customer['order_id']);
+                                    if (isset($status) && !empty($status)) {
+                                        $stat = '';
+                                        foreach ($status as $k => $v) {
+                                            $select = ($k == $customer['c_approve'] && $customer['c_approve'] <> '') ? 'selected' : '';
+                                            $stat .='<option value="' . $k . '" ' . $select . '>' . $v . '</option>';
+                                        }
+                                        echo $stat;
                                     }
-                                    echo $stat;
+                                    ?>
+                                </select>
+                                <?php if ($customer['customer_approve'] != 1) { ?>
+                                    <p><span style="color: red;">*** Customer not approve, <a href="<?php echo base_url('sitecontrol/customer'); ?>" onclick="return confirm('You want go to approve customer?');">Go to approve customer click</a></span></p>
+                                <?php } ?>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <?php
+                                if ($customer['c_approve'] == 1 && $this->uri->segment(4) == 'so') {
+                                    echo '<label class="col-xs-12"> &nbsp; </label>';
+                                    echo form_button(array(
+                                        'type' => 'button',
+                                        'class' => 'btn btn-danger',
+                                        'content' => ' CN',
+                                        'onclick' => "window.location='".base_url('sitecontrol/order/cn/'.$this->uri->segment(5))."'"
+                                    ));
                                 }
                                 ?>
-                            </select>
-                            <?php if ($customer['customer_approve'] != 1) { ?>
-                                <p><span style="color: red;">*** Customer not approve, <a href="<?php echo base_url('sitecontrol/customer'); ?>" onclick="return confirm('You want go to approve customer?');">Go to approve customer click</a></span></p>
-                            <?php } ?>
+                            </div>
+                            <?PHP
+                        }
+                        ?>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group col-sm-12">
+                            <input type="hidden" name="order_id" value="<?PHP echo $customer['order_id']; ?>" >
+                            <input type="hidden" name="type" value="<?PHP echo $this->uri->segment(4); ?>" >
+                                <button class="btn btn-info" type="submit"><i class="fa fa-check"></i> Save</button>
+                                <button class="btn btn-default" type="reset"><i class="fa fa-times"></i> Cancel</button>
                         </div>
-                        <div class="form-group col-sm-6">
-                            <?php
-                            if ($customer['c_approve'] == 1 && $this->uri->segment(4) == 'so') {
-                                echo '<label class="col-xs-12"> &nbsp; </label>';
-                                echo form_button(array(
-                                    'type' => 'button',
-                                    'class' => 'btn btn-danger',
-                                    'content' => ' CN',
-                                    'onclick' => "window.location='".base_url('sitecontrol/order/cn/'.$this->uri->segment(5))."'"
-                                ));
-                            }
-                            ?>
-                        </div>
-                        <?PHP
-                    }
-                    ?>
-                    <div class="clearfix"></div>
-                    <hr>
-                    <div class="form-group col-sm-12">
-                        <input type="hidden" name="order_id" value="<?PHP echo $customer['order_id']; ?>" >
-                        <input type="hidden" name="type" value="<?PHP echo $this->uri->segment(4); ?>" >
-                        <button class="btn btn-info" type="submit"><i class="fa fa-check"></i> Save</button>
-                        <button class="btn btn-default" type="reset"><i class="fa fa-times"></i> Cancel</button>
-                    </div>
+                    <?php }?>
                     <?PHP echo form_close() ?>
                 </div>
             </div>

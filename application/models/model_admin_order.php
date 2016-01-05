@@ -204,7 +204,8 @@ class model_admin_order extends CI_Model {
         if($type == "so"){
             $data = $this->db->select('
                         *, l.order_list_code as c_code, order_list_approve as c_approve,
-                        order_list_remark as c_remark, order_list_note as c_note
+                        order_list_remark as c_remark, order_list_note as c_note,
+                        order_list_option_type as c_option
                     ')
                     ->from('bio_order o')
                     ->join('bio_member m', 'o.FK_member_id = m.member_id', 'INNER')
@@ -219,7 +220,8 @@ class model_admin_order extends CI_Model {
         }else if($type == "foc"){
             $data = $this->db->select('
                         *, f.foc_code as c_code, foc_approve as c_approve,
-                        foc_remark as c_remark, foc_note as c_note
+                        foc_remark as c_remark, foc_note as c_note,
+                        CONCAT(0) as c_option
                     ')
                     ->from('bio_order o')
                     ->join('bio_member m', 'o.FK_member_id = m.member_id', 'INNER')
@@ -232,7 +234,8 @@ class model_admin_order extends CI_Model {
         }else if($type == "lo"){
             $data = $this->db->select('
                         *, ob_code as c_code, ob_approve as c_approve,
-                        ob_remark as c_remark, ob_note as c_note
+                        ob_remark as c_remark, ob_note as c_note,
+                        ob_option_type as c_option
                     ')
                     ->from('bio_order o')
                     ->join('bio_member m', 'o.FK_member_id = m.member_id', 'INNER')
@@ -818,6 +821,299 @@ class model_admin_order extends CI_Model {
             return 1;
         }
     }
+
+    
+    public function insert_for_cn($val) {
+        $this->db->trans_begin();
+        $date = explode('/', $val['order_date']);
+        $delivery = explode('/', $val['date_delivery']);
+        $date_order_add = $date[2].'-'.$date[1].'-'.$date[0].date(' H:i:s');
+        $date_delivery= $delivery[2].'-'.$delivery[1].'-'.$delivery[0];
+        $data_update = array('order_status' => 1);
+        $data_order = array(
+            'FK_member_id' => $val['FK_member_id'],
+            'FK_customer_id' => $val['FK_customer_id'],
+            'FK_zone_id' => $val['FK_zone_id'],
+            'order_date_create' => $date_order_add,
+            'order_status' => 1,
+            'order_discount' => $val['discount'],
+            'order_rebate_normal' => $val['re_normal'],
+            'order_rebate_extra_s' => $val['re_ext_s'],
+            'order_rebate_extra_td' => $val['re_ext_td'],
+        );
+        $this->db->insert('bio_order', $data_order);
+        $oid = $this->db->insert_id();
+        
+        
+        $data_his = array(
+            'his_code' => 'CN',
+            'his_type' => 2,
+            'his_status' => 1,
+        );
+        $this->db->insert('bio_order_history', $data_his);
+        $cn_id = $this->db->insert_id();
+        
+        // Detail CN
+        foreach($val['so_for_cn'] as $rs_cn){
+            $data_his_detail = array(
+                'FK_history_id' => $cn_id,
+                'FK_order_id' => $rs_cn,
+                'FK_order_id_type' => $oid,
+            );
+            $this->db->insert('bio_order_history_ref', $data_his_detail);
+        }
+        
+        $sale_detail = $this->member_detail($val['FK_member_id']);
+        $customer = $this->customer_list($val['FK_member_id']);
+        $body_mail  = ' ถึงผู้ดูแลระบบ <br/>';
+        $body_mail .= ' ผู้ดำเนินการ '.$sale_detail['member_name'].'<br/>';
+        $body_mail .= $customer[0]['customer_name'].' ได้ทำการสั่งซื้อสินค้า  <br/>';
+        
+        $data_customer = array(
+            'customer_taxid' => $val['customer_taxid'],
+            'customer_delivery' => $val['customer_delivery'],
+        );
+        $this->db->update('bio_customer', $data_customer, array('customer_id' => $val['FK_customer_id']));
+        if($this->session->userdata('order_add_admin')){
+            foreach($this->session->userdata('order_add_admin') as $rs_product){
+                if($rs_product['type'] == 'so'){
+                    $product_so[] = $rs_product;
+
+//                }else if($rs_product['type'] == 'foc'){
+//                    $product_foc[] = $rs_product;
+//
+//                }else if($rs_product['type'] == 'lo'){
+//                    $product_lo[] = $rs_product;
+
+                }
+            }
+        }
+        $total = $before_total = $normal = $extra_s = $extra_td = 0;
+        if(!empty($product_so)){
+            $so_code = $this->model_utility->gen_code_so();
+            $data_order_list = array(
+                'order_list_order_id' => $oid,
+                'order_list_code' => $so_code,
+                'order_list_date' => $date_order_add,
+                'order_list_remark' => $val['order_remark'],
+                'order_list_free' => 0,
+                'order_list_receipt_date' => $val['date_receipt'],
+                'order_list_date_delivery' => '$date_delivery',
+                'order_list_for_cn' => 1,
+                'order_list_status' => 1,
+            );
+            $this->db->insert('bio_order_list', $data_order_list);
+            $so_id = $this->db->insert_id();
+            
+            $body_mail .= 'หมายเลขการสั่งซื้อ '.$so_code.'<br/>';
+            $body_mail .= 'วันที่สั่งซื้อ '.$date_order_add.'<br/>';
+            $body_mail .= '
+                <table>
+                    <tr>
+                        <td>Code</td>
+                        <td>Product</td>
+                        <td>Quantity</td>
+                        <td>Price/Unit(Baht)</td>
+                        <td>Free</td>
+                        <td>Total(Baht)</td>
+                    </tr>
+            ';
+            
+            $data_update = array_merge($data_update, array('order_list_code' => $so_code));
+            foreach($product_so as $rs_so){
+                $subtotal = ($rs_so['price']*$rs_so['qty'])-((($rs_so['price']*$rs_so['qty'])*$rs_so['discount'])/100);
+                $data_order_list_detail = array(
+                    'ldetail_order_list_id' => $so_id,
+                    'ldetail_product_id' => $rs_so['pid'],
+                    'ldetail_type' => '',
+                    'ldetail_qty' => $rs_so['qty'],
+                    'ldetail_price' => $rs_so['price'],
+                    'ldetail_discount' => $rs_so['discount'],
+                    'ldetail_subtotal' => $subtotal,
+                    'ldetail_free' => $rs_so['free'],
+                    'ldetail_status' => 1,
+                );
+                $this->db->insert('bio_order_list_detail', $data_order_list_detail);
+                
+                $total += $subtotal;
+                $product = @$this->data_product(@$rs_so['pid']);
+                $body_mail .= '
+                    <tr>
+                        <td>'.@$product['product_code'].'</td>
+                        <td>'.@$product['product_name'].'</td>
+                        <td>'.@$rs_so['qty'].'</td>
+                        <td>'.@$rs_so['price'].'</td>
+                        <td>'.@$rs_so['free'].'</td>
+                        <td>'.@$subtotal.'</td>
+                    </tr>
+                ';
+                if($product['product_type_rebate'] == 1 && $val['re_ext_s'] > 0){
+                    $extra_s += ((@$subtotal*$val['re_ext_s'])/100);
+                }
+                if($product['product_type_rebate'] == 2 && $val['re_ext_td'] > 0){
+                    $extra_td += ((@$subtotal*$val['re_ext_td'])/100);
+                }
+            }
+        }
+//        if(!empty($product_foc)){
+//            $foc_code = $this->model_utility->gen_code_foc();
+//            $data_order_foc = array(
+//                'foc_order_id' => $oid,
+//                'foc_code' => $foc_code,
+//                'foc_date' => $date_order_add,
+//                'foc_remark' => $val['order_remark'],
+//                'foc_receipt_date' => $val['date_receipt'],
+//                'foc_date_delivery' => '$date_delivery',
+//                'foc_status' => 1,
+//            );
+//            $this->db->insert('bio_order_foc', $data_order_foc);
+//            $foc_id = $this->db->insert_id();
+//            
+//            $body_mail .= 'หมายเลขการสั่งซื้อ '.$foc_code.'<br/>';
+//            $body_mail .= 'วันที่สั่งซื้อ '.$date_order_add.'<br/>';
+//            $body_mail .= '
+//                <table>
+//                    <tr>
+//                        <td>Code</td>
+//                        <td>Product</td>
+//                        <td>Quantity</td>
+//                        <td>Price/Unit(Baht)</td>
+//                        <td>Free</td>
+//                        <td>Total(Baht)</td>
+//                    </tr>
+//            ';
+//            
+//            $data_update = array_merge($data_update, array('order_foc_code' => $foc_code));
+//            foreach($product_foc as $rs_foc){
+//                $subtotal = ($rs_foc['price']*$rs_foc['qty'])-((($rs_foc['price']*$rs_foc['qty'])*$rs_foc['discount'])/100);
+//                $data_order_foc_detail = array(
+//                    'fdetail_foc_id' => $foc_id,
+//                    'fdetail_product_id' => $rs_foc['pid'],
+//                    'fdetail_qty' => $rs_foc['qty'],
+//                    'fdetail_status' => 1,
+//                );
+//                $this->db->insert('bio_order_foc_detail', $data_order_foc_detail);
+//                
+//                $product = @$this->data_product(@$rs_foc['pid']);
+//                $body_mail .= '
+//                    <tr>
+//                        <td>'.@$product['product_code'].'</td>
+//                        <td>'.@$product['product_name'].'</td>
+//                        <td>'.@$rs_foc['qty'].'</td>
+//                        <td>F.O.C</td>
+//                        <td>F.O.C</td>
+//                        <td>F.O.C</td>
+//                    </tr>
+//                ';
+//            }
+//        }
+//        if(!empty($product_lo)){
+//            $lo_code = $this->model_utility->gen_code_lo();
+//            $data_order_borrow = array(
+//                'ob_order_id' => $oid,
+//                'ob_code' => $lo_code,
+//                'ob_date' => $date_order_add,
+//                'ob_remark' => $val['order_remark'],
+//                'ob_receipt_date' => $val['date_receipt'],
+//                'ob_date_delivery' => '$date_delivery',
+//                'ob_status' => 1,
+//            );
+//            $this->db->insert('bio_order_borrow', $data_order_borrow);
+//            $lo_id = $this->db->insert_id();
+//            
+//            $body_mail .= 'หมายเลขการสั่งซื้อ '.$lo_code.'<br/>';
+//            $body_mail .= 'วันที่สั่งซื้อ '.$date_order_add.'<br/>';
+//            $body_mail .= '
+//                <table>
+//                    <tr>
+//                        <td>Code</td>
+//                        <td>Product</td>
+//                        <td>Quantity</td>
+//                        <td>Price/Unit(Baht)</td>
+//                        <td>Free</td>
+//                        <td>Total(Baht)</td>
+//                    </tr>
+//            ';
+//            
+//            
+//            $data_update = array_merge($data_update, array('order_borrow_code' => $lo_code));
+//            foreach($product_lo as $rs_lo){
+//                $subtotal = ($rs_lo['price']*$rs_lo['qty'])-((($rs_lo['price']*$rs_lo['qty'])*$rs_lo['discount'])/100);
+//                $data_order_borrow_detail = array(
+//                    'obd_ob_id' => $lo_id,
+//                    'obd_product_id' => $rs_lo['pid'],
+//                    'obd_qty_borrow' => $rs_lo['qty'],
+//                    'obd_price' => $rs_lo['price'],
+//                    'obd_total' => $subtotal,
+//                    'obd_status' => 1,
+//                );
+//                $this->db->insert('bio_order_borrow_detail', $data_order_borrow_detail);
+//                
+//                $total += $subtotal;
+//                $product = @$this->data_product(@$rs_lo['pid']);
+//                $body_mail .= '
+//                    <tr>
+//                        <td>'.@$product['product_code'].'</td>
+//                        <td>'.@$product['product_name'].'</td>
+//                        <td>'.@$rs_lo['qty'].'</td>
+//                        <td>'.@$rs_lo['price'].'</td>
+//                        <td>'.@$rs_lo['free'].'</td>
+//                        <td>'.@$subtotal.'</td>
+//                    </tr>
+//                ';
+//            }
+//        }
+        $this->db->update('bio_order', $data_update, array('order_id' => $oid));
+        
+        $before_total += (($total*100)/107);
+        $normal += (($total*$val['re_normal'])/100);
+        $body_mail .= '
+            <tr>
+                <td colspan="5" align="right">'.((@$val['discount'])?'( '.@$val['discount'].'% )':'').' Discount :</td>
+                <td>'.number_format((($total*@$val['discount'])/100),2).' Baht</td>
+            </tr>
+            <tr>
+                <td colspan="5" align="right"> Sub Total :</td>
+                <td>'.number_format($before_total,2).' Baht</td>
+            </tr>
+            <tr>
+                <td colspan="5" align="right"> Vat(7%) :</td>
+                <td>'.number_format(($total-$before_total),2).' Baht</td>
+            </tr>
+            <tr>
+                <td colspan="5" align="right"> Total Price :</td>
+                <td>'.number_format($total,2).' Baht</td>
+            </tr>
+            <tr>
+                <td colspan="5" align="right"> Rebate Normal (-) :</td>
+                <td>'.number_format($normal,2).' Baht</td>
+            </tr>
+            <tr>
+                <td colspan="5" align="right"> Rebate Extra(S) (-) :</td>
+                <td>'.number_format($extra_s,2).' Baht</td>
+            </tr>
+            <tr>
+                <td colspan="5" align="right"> Rebate Extra(TD) (-) :</td>
+                <td>'.number_format($extra_td,2).' Baht</td>
+            </tr>
+            <tr>
+                <td colspan="5" align="right"> Grand Price :</td>
+                <td>'.number_format(($total-$normal-$extra_s-$extra_td),2).' Baht</td>
+            </tr>
+            </table>
+            ท่านสามารถทำการ Approve ได้โดยการ <a href="'.base_url('sitecontrol/order/approve/'.$oid.'').'">คลิกที่นี่</a> 
+            หรือ ท่านสามารถทำการ Reject ได้โดยการ <a href="'.base_url('sitecontrol/order/reject/'.$oid.'').'">คลิกที่นี่</a> <br/>
+        ';
+        $this->send_mail_submit_order($body_mail);
+        
+        if ($this->db->trans_status() === FALSE){
+            $this->db->trans_rollback();
+        }else{
+            $this->db->trans_commit();
+            $this->session->unset_userdata('order_add_admin');
+            return 1;
+        }
+    }
     
     public function detail_customer($val){
         $query = $this->db->where('customer_id', $val['cid'])->get('bio_customer')->row();
@@ -901,6 +1197,26 @@ class model_admin_order extends CI_Model {
     public function cn_for_so() {
         $id = $this->uri->segment(4);
         $this->db->update('bio_order_list', array('order_list_option_type' => 1), array('order_list_order_id' => $id));
-        
+        $so_detail = $this->db->where('order_list_order_id', $id)->get('bio_order_list')->first_row('array');
+        echo "<script>window.location='".base_url('sitecontrol/order')."'</script>";
+        exit();
+    }
+    
+    public function cn_list($val){
+        $result = $this->db
+                ->join('bio_order as o', 'o.order_id = l.order_list_order_id', 'INNER')
+                ->where(array(
+                    'FK_customer_id' => $val['cid'],
+                    'order_list_status' => 1,
+                    'order_list_approve' => 1,
+                    'order_list_option_type' => 1,
+                ))
+                ->get('bio_order_list as l')
+                ->result_array();
+        $data = '<option value="0" disabled>Select SO for CN</option>';
+        foreach($result as $rs){
+            $data .= '<option value="'.$rs['order_list_id'].'">'.$rs['order_list_code'].'</option>';
+        }
+        return $data;
     }
 }
